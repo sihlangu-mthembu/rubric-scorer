@@ -48,9 +48,12 @@ Jinja templates. `base.html` holds the shared layout; other pages use `{% extend
 
 ## `tests/`
 
-16 pytest tests. `conftest.py` creates a fresh app and database per test, and an `Actions` helper that behaves like a user: it reads the CSRF token from a page before every form submission. Tests cover login and roles, CSRF, open redirects, CSV validation, scoring and re-scoring, agreement results, access control, formula injection, XSS escaping and the kappa maths.
+17 pytest tests. `conftest.py` creates a fresh app and database per test, and an `Actions` helper that behaves like a user: it reads the CSRF token from a page before every form submission. Tests cover login and roles, CSRF, open redirects, CSV validation, scoring and re-scoring, agreement results, access control, formula injection, XSS escaping and the kappa maths.
 
 ## Deployment
+
+`bootstrap()` in `db.py` runs at start-up: if `ADMIN_PASSWORD` is set it creates the admin account (and, with `SEED_DEMO`, the demo batch). This matters on free hosting, where the database starts empty after every restart: without it, whoever registered first after a restart would become admin. A test checks that a stranger registering first stays a reviewer.
+
 
 `Dockerfile` runs the app with **gunicorn**, a production web server (Flask's built-in server is for development only). The database lives in `/data` so it can be put on a persistent volume.
 

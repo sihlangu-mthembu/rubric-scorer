@@ -3,7 +3,7 @@
 import functools
 import sqlite3
 
-from flask import Blueprint, abort, flash, g, redirect, render_template, request, session, url_for
+from flask import Blueprint, abort, current_app, flash, g, redirect, render_template, request, session, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from .db import get_db
@@ -48,8 +48,11 @@ def register():
             error = "Password must be at least 8 characters."
         if error is None:
             db = get_db()
-            # The very first account becomes the admin.
-            is_admin = db.execute("SELECT COUNT(*) FROM users").fetchone()[0] == 0
+            # Local use: the very first account becomes the admin. When ADMIN_PASSWORD is set
+            # (as on the public deployment), the admin is created at start-up instead, so a
+            # stranger who registers first can never become admin.
+            is_admin = (not current_app.config.get("ADMIN_PASSWORD")
+                        and db.execute("SELECT COUNT(*) FROM users").fetchone()[0] == 0)
             try:
                 db.execute("INSERT INTO users (username, password_hash, is_admin) VALUES (?, ?, ?)",
                            (username, generate_password_hash(password), int(is_admin)))

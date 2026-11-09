@@ -91,6 +91,34 @@ def seed_demo(admin: str, password: str) -> None:
     click.echo(f"Created admin '{admin}' and demo batch {batch_id} with {len(rows)} items.")
 
 
+def bootstrap(app) -> None:
+    """On start-up, create the admin from ADMIN_PASSWORD and, if SEED_DEMO is set, a demo batch.
+
+    Used on hosts without persistent storage, where the database starts empty after every restart.
+    """
+    password = app.config.get("ADMIN_PASSWORD")
+    if not password:
+        return
+    with app.app_context():
+        db = get_db()
+        username = app.config.get("ADMIN_USERNAME", "admin")
+        admin = db.execute("SELECT id FROM users WHERE username = ?", (username,)).fetchone()
+        if admin is None:
+            try:
+                user_id = db.execute("INSERT INTO users (username, password_hash, is_admin) VALUES (?, ?, 1)",
+                                     (username, generate_password_hash(password))).lastrowid
+                db.commit()
+            except sqlite3.IntegrityError:          # another worker created it at the same moment
+                user_id = db.execute("SELECT id FROM users WHERE username = ?", (username,)).fetchone()["id"]
+        else:
+            user_id = admin["id"]
+        has_batches = db.execute("SELECT COUNT(*) FROM batches").fetchone()[0] > 0
+        if app.config.get("SEED_DEMO") and not has_batches:
+            with DEMO_CSV.open(newline="", encoding="utf-8") as f:
+                create_batch("Demo: general knowledge answers", DEMO_LABELS, list(csv.DictReader(f)), user_id)
+
+
 def init_app(app) -> None:
     app.teardown_appcontext(close_db)
     app.cli.add_command(seed_demo)
+    bootstrap(app)

@@ -8,5 +8,9 @@ services:
     envVars:
       - key: SECRET_KEY
         generateValue: true        # Render creates a long random secret; never committed to Git
+      - key: ADMIN_PASSWORD
+        generateValue: true        # the admin password: view it in Render under Environment
+      - key: SEED_DEMO
+        value: "1"                 # reload the demo batch after every restart
       - key: RUBRIC_DB
         value: /tmp/rubric.db      # free plan has no persistent disk: data resets on redeploy/restart

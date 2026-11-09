@@ -13,6 +13,9 @@ def create_app(test_config: dict | None = None) -> Flask:
         SECRET_KEY=os.environ.get("SECRET_KEY", "dev-only-change-me"),
         DATABASE=os.environ.get("RUBRIC_DB", os.path.join(app.instance_path, "rubric.db")),
         MAX_CONTENT_LENGTH=2 * 1024 * 1024,  # reject uploads over 2 MB
+        ADMIN_USERNAME=os.environ.get("ADMIN_USERNAME", "admin"),
+        ADMIN_PASSWORD=os.environ.get("ADMIN_PASSWORD"),
+        SEED_DEMO=os.environ.get("SEED_DEMO", "") == "1",
     )
     if test_config:
         app.config.update(test_config)

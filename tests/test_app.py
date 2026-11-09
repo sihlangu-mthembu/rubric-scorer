@@ -156,3 +156,27 @@ def test_kappa_perfect_and_chance():
 
 def test_pairwise_skips_pairs_with_too_few_shared_items():
     assert pairwise_agreement({"x": {1: "a"}, "y": {1: "a"}}) == []
+
+
+# --- deployment bootstrap -----------------------------------------------------------------
+
+def test_admin_password_bootstrap(tmp_path):
+    from rubric import create_app
+    from tests.conftest import Actions
+    app = create_app({"TESTING": True, "DATABASE": str(tmp_path / "boot.db"), "SECRET_KEY": "t",
+                      "ADMIN_PASSWORD": "admin-secret-123", "SEED_DEMO": True})
+    client = app.test_client()
+    actions = Actions(client)
+    # A stranger who registers first must NOT become admin.
+    actions.register("stranger")
+    actions.login("stranger")
+    assert client.get("/batches/new").status_code == 403
+    actions.logout()
+    # The bootstrapped admin can log in and sees the seeded demo batch.
+    actions.login("admin", "admin-secret-123")
+    assert client.get("/batches/new").status_code == 200
+    assert b"Demo: general knowledge answers" in client.get("/").data
+    # Re-creating the app (a restart) does not duplicate the admin or the demo batch.
+    create_app({"TESTING": True, "DATABASE": str(tmp_path / "boot.db"), "SECRET_KEY": "t",
+                "ADMIN_PASSWORD": "admin-secret-123", "SEED_DEMO": True})
+    assert client.get("/").data.count(b"Demo: general knowledge answers") == 1

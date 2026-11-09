@@ -9,4 +9,4 @@ COPY rubric ./rubric
 ENV RUBRIC_DB=/data/rubric.db
 RUN mkdir -p /data
 EXPOSE 8000
-CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 2 'rubric:create_app()'"]
+CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 1 --threads 4 'rubric:create_app()'"]
