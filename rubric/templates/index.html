@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Batches{% endblock %}
+{% block content %}
+<h1>Batches</h1>
+{% if not batches %}
+  <p class="muted">No batches yet.{% if g.user.is_admin %} <a href="{{ url_for('batches.new') }}">Create one</a> by uploading a CSV.{% endif %}</p>
+{% else %}
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Batch</th><th>Your progress</th><th>Created</th><th></th></tr></thead>
+  <tbody>
+  {% for b in batches %}
+    <tr>
+      <td><a href="{{ url_for('batches.view', batch_id=b.id) }}">{{ b.name }}</a></td>
+      <td>
+        <div class="bar"><span style="width: {{ (100 * b.done / b.total) if b.total else 0 }}%"></span></div>
+        {{ b.done }} / {{ b.total }}
+      </td>
+      <td class="muted">{{ b.created_at[:10] }}</td>
+      <td>{% if g.user.is_admin %}<a href="{{ url_for('batches.results', batch_id=b.id) }}">Results</a>{% endif %}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endif %}
+{% endblock %}

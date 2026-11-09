@@ -1,0 +1,23 @@
+[project]
+name = "rubric-scorer"
+version = "0.1.0"
+description = "Full-stack web app for scoring AI responses against a rubric, with reviewer agreement and CSV export"
+requires-python = ">=3.10"
+authors = [{ name = "Sihlangu Mthembu" }]
+license = { text = "MIT" }
+dependencies = ["flask>=3.0"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.5"]
+
+[tool.setuptools]
+packages = ["rubric"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]

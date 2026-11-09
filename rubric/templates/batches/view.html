@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}{{ batch.name }}{% endblock %}
+{% block content %}
+<h1>{{ batch.name }}</h1>
+<p class="muted">Labels: {{ batch.labels.replace(',', ', ') }}
+  {% if g.user.is_admin %} · <a href="{{ url_for('batches.results', batch_id=batch.id) }}">Results</a>{% endif %}</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>#</th><th>Prompt</th><th>Your label</th><th>Quality</th><th></th></tr></thead>
+  <tbody>
+  {% for item in items %}
+    <tr>
+      <td>{{ loop.index }}</td>
+      <td class="clip">{{ item.prompt }}</td>
+      <td>{% if item.label %}<span class="pill">{{ item.label }}</span>{% else %}<span class="muted">not scored</span>{% endif %}</td>
+      <td>{{ item.quality or '' }}</td>
+      <td><a href="{{ url_for('batches.score', item_id=item.id) }}">{{ 'Edit' if item.label else 'Score' }}</a></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

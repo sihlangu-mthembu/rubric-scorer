@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}New batch{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>New batch</h1>
+  <form method="post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label>Name <input name="name" required maxlength="100" placeholder="e.g. Finance answers, week 1"></label>
+    <label>Rubric labels (comma-separated)
+      <input name="labels" required value="helpful, unhelpful, hallucination, unsafe">
+    </label>
+    <label>CSV file with <code>prompt</code> and <code>response</code> columns
+      <input type="file" name="file" accept=".csv,text/csv" required>
+    </label>
+    <button>Create batch</button>
+  </form>
+  <p class="muted">Up to 500 items, UTF-8 CSV, 2 MB maximum.</p>
+</section>
+{% endblock %}

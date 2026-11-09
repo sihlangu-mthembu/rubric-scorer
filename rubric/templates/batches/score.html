@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Score item{% endblock %}
+{% block content %}
+<p class="muted"><a href="{{ url_for('batches.view', batch_id=batch.id) }}">← {{ batch.name }}</a></p>
+<div class="score-grid">
+  <section class="card">
+    <h2>Prompt</h2>
+    <p class="prewrap">{{ item.prompt }}</p>
+    <h2>AI response</h2>
+    <p class="prewrap response">{{ item.response }}</p>
+  </section>
+  <section class="card">
+    <h2>Your score</h2>
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <fieldset>
+        <legend>Label</legend>
+        {% for label in labels %}
+          <label class="choice">
+            <input type="radio" name="label" value="{{ label }}" required
+                   {% if existing and existing.label == label %}checked{% endif %}> {{ label }}
+          </label>
+        {% endfor %}
+      </fieldset>
+      <label>Overall quality (1 = very poor, 5 = excellent)
+        <input type="number" name="quality" min="1" max="5" required value="{{ existing.quality if existing else '' }}">
+      </label>
+      <label>Rationale
+        <textarea name="rationale" rows="5" required minlength="10"
+                  placeholder="Why this label? Point to the specific claim, error or strength.">{{ existing.rationale if existing else '' }}</textarea>
+      </label>
+      <button>Save and next</button>
+    </form>
+  </section>
+</div>
+{% endblock %}

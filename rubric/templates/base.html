@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{% endblock %} · Rubric Scorer</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <nav>
+    <a class="brand" href="{{ url_for('index') }}">Rubric Scorer</a>
+    <div class="nav-right">
+      {% if g.user %}
+        <span class="muted">{{ g.user.username }}{% if g.user.is_admin %} <span class="pill">admin</span>{% endif %}</span>
+        {% if g.user.is_admin %}<a href="{{ url_for('batches.new') }}">New batch</a>{% endif %}
+        <form method="post" action="{{ url_for('auth.logout') }}" class="inline">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <button class="link">Log out</button>
+        </form>
+      {% else %}
+        <a href="{{ url_for('auth.register') }}">Register</a>
+        <a href="{{ url_for('auth.login') }}">Log in</a>
+      {% endif %}
+    </div>
+  </nav>
+  <main>
+    {% for message in get_flashed_messages() %}
+      <div class="flash">{{ message }}</div>
+    {% endfor %}
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

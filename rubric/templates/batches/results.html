@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Results · {{ batch.name }}{% endblock %}
+{% block content %}
+<h1>Results: {{ batch.name }}</h1>
+<p class="muted">{{ total_scores }} scores from {{ reviewers|length }} reviewer{{ '' if reviewers|length == 1 else 's' }} ·
+  <a href="{{ url_for('batches.export', batch_id=batch.id) }}">Export CSV</a></p>
+
+<div class="columns">
+  <section class="card">
+    <h2>Reviewer agreement</h2>
+    {% if pairs %}
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Pair</th><th>Shared items</th><th>Agreement</th><th>Cohen's kappa</th></tr></thead>
+      <tbody>
+      {% for p in pairs %}
+        <tr>
+          <td>{{ p.pair }}</td><td>{{ p.shared }}</td>
+          <td>{{ '%.0f' % (100 * p.agreement) }}%</td>
+          <td>{{ '%.2f' % p.kappa }} <span class="muted">({{ p.band }})</span></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+    <p class="muted">Kappa corrects raw agreement for the agreement expected by chance (Landis &amp; Koch bands).</p>
+    {% else %}
+      <p class="muted">Agreement appears once two reviewers have scored at least two of the same items.</p>
+    {% endif %}
+  </section>
+
+  <section class="card">
+    <h2>Label distribution</h2>
+    {% set top = (label_counts.values()|max) or 1 %}
+    {% for label, count in label_counts.items() %}
+      <div class="dist-row">
+        <span class="dist-label">{{ label }}</span>
+        <div class="bar"><span style="width: {{ 100 * count / top }}%"></span></div>
+        <span>{{ count }}</span>
+      </div>
+    {% endfor %}
+  </section>
+</div>
+
+<section class="card">
+  <h2>Disagreements to adjudicate ({{ disagreements|length }})</h2>
+  {% if disagreements %}
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Item</th><th>Prompt</th>{% for r in reviewers %}<th>{{ r }}</th>{% endfor %}</tr></thead>
+    <tbody>
+    {% for d in disagreements %}
+      <tr>
+        <td><a href="{{ url_for('batches.score', item_id=d.item_id) }}">{{ d.item_id }}</a></td>
+        <td class="clip">{{ d.prompt }}</td>
+        {% for r in reviewers %}<td>{{ d.labels.get(r, '—') }}</td>{% endfor %}
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}
+    <p class="muted">None so far.</p>
+  {% endif %}
+</section>
+{% endblock %}
