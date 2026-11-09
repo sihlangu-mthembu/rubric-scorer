@@ -1,0 +1,12 @@
+# Render Blueprint: New -> Blueprint -> pick this repo.
+services:
+  - type: web
+    name: rubric-scorer
+    runtime: docker
+    plan: free
+    healthCheckPath: /auth/login
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true        # Render creates a long random secret; never committed to Git
+      - key: RUBRIC_DB
+        value: /tmp/rubric.db      # free plan has no persistent disk: data resets on redeploy/restart
